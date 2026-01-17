@@ -20,7 +20,6 @@ def reports_ui(user):
             "created_at": r.created_at,
             "created_by": r.created_by
         } for r in rows]
-        full = rows
     finally:
         db.close()
 
@@ -31,8 +30,8 @@ def reports_ui(user):
     df = pd.DataFrame(data)
     st.dataframe(df, use_container_width=True, hide_index=True)
 
-    sel = st.selectbox("اختر تقييمًا لتوليد تقرير", df["id"].tolist())
-    if st.button("توليد PDF", type="primary"):
+    sel = st.selectbox("اختر تقييمًا لتوليد تقرير", df["id"].tolist(), key="rep_select_eval")
+    if st.button("توليد PDF", type="primary", key="rep_gen_pdf"):
         db: Session = SessionLocal()
         try:
             r = db.query(Evaluation).filter(Evaluation.id == int(sel)).first()
@@ -58,4 +57,4 @@ def reports_ui(user):
             "التاريخ": r.created_at
         }
         pdf_bytes = generate_pdf(report_data)
-        st.download_button("تحميل التقرير PDF", data=pdf_bytes, file_name=f"evaluation_{r.id}.pdf", mime="application/pdf")
+        st.download_button("تحميل التقرير PDF", data=pdf_bytes, file_name=f"evaluation_{r.id}.pdf", mime="application/pdf", key="rep_dl")

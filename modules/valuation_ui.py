@@ -12,36 +12,34 @@ def valuation_ui(user):
 
     c1, c2, c3, c4 = st.columns(4)
     with c1:
-        activity = st.selectbox("النشاط", [
-            "تجاري","صناعي","صحي","تعليمي","رياضي وترفيهي","سياحي","زراعي وحيواني","بيئي",
-            "اجتماعي","نقل","مركبات","صيانة وتعليم وتركيب","تشييد وإدارة عقارات",
-            "خدمات عامة","ملبوسات ومنسوجات","مرافق عامة","مالي"
-        ])
+        activity = st.selectbox(
+            "النشاط",
+            [
+                "تجاري","صناعي","صحي","تعليمي","رياضي وترفيهي","سياحي","زراعي وحيواني","بيئي",
+                "اجتماعي","نقل","مركبات","صيانة وتعليم وتركيب","تشييد وإدارة عقارات",
+                "خدمات عامة","ملبوسات ومنسوجات","مرافق عامة","مالي"
+            ],
+            key="eval_activity"
+        )
     with c2:
         city = st.text_input("المدينة", key="eval_city")
     with c3:
         district = st.text_input("الحي", key="eval_district")
     with c4:
-        contract_years = st.number_input("مدة العقد (سنة)", min_value=1, value=10)
+        contract_years = st.number_input("مدة العقد (سنة)", min_value=1, value=10, key="eval_contract_years")
 
-    area_m2 = st.number_input("المساحة (م²)", min_value=0.0, value=0.0)
+    area_m2 = st.number_input("المساحة (م²)", min_value=0.0, value=0.0, key="eval_area")
 
     st.markdown("### تحديد الموقع")
     if "clicked" not in st.session_state:
         st.session_state.clicked = None
 
-    # build comps points for map display once location set
     center_lat, center_lon, zoom = 24.7136, 46.6753, 6
     clicked = st.session_state.clicked
-    deal_points = []
-    if clicked and area_m2 > 0:
-        # show nearby deals on map (lightweight)
-        _, _, _, comps = compute_from_deals(activity, area_m2, clicked[0], clicked[1], city=city or None, radius_km=15)
-        # comps only contains (rate, dist, year) — map needs points. We'll skip here unless user uses deals with coords.
-        deal_points = []
 
-    m = build_map(center_lat, center_lon, zoom, clicked=clicked, deal_points=deal_points)
-    map_data = st_folium(m, height=420, width=None)
+    m = build_map(center_lat, center_lon, zoom, clicked=clicked, deal_points=None)
+    map_data = st_folium(m, height=420, width=None, key="eval_map")
+
     if map_data and map_data.get("last_clicked"):
         lat = map_data["last_clicked"]["lat"]
         lon = map_data["last_clicked"]["lng"]
@@ -50,7 +48,7 @@ def valuation_ui(user):
         clicked = st.session_state.clicked
 
     st.markdown("### رفع كروكي الموقع (اختياري)")
-    uploaded = st.file_uploader("PDF أو صورة", type=["pdf","png","jpg","jpeg"])
+    uploaded = st.file_uploader("PDF أو صورة", type=["pdf","png","jpg","jpeg"], key="eval_croquis_upload")
     croquis_path, croquis_text = save_croquis(uploaded)
     if croquis_path:
         st.info(f"تم حفظ الكروكي: {croquis_path}")
@@ -64,7 +62,7 @@ def valuation_ui(user):
     method_suggested = recommend_method(activity)
     st.write(f"**الأسلوب المقترح:** {method_suggested}")
 
-    if st.button("تنفيذ التقييم", type="primary"):
+    if st.button("تنفيذ التقييم", type="primary", key="eval_run"):
         inputs_complete = bool(area_m2 > 0 and clicked is not None)
         lat, lon = (clicked[0], clicked[1]) if clicked else (None, None)
 
@@ -73,7 +71,6 @@ def valuation_ui(user):
             rec, mn, mx, comps = compute_from_deals(activity, area_m2, lat, lon, city=city or None, radius_km=15)
 
         if rec is None:
-            # fallback to default rate per m2
             rate = DEFAULT_RATE_PER_M2.get(activity, 40)
             rec = rate * area_m2
             mn, mx = rec * 0.80, rec * 1.20

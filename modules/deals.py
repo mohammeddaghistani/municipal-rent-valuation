@@ -13,23 +13,27 @@ def deals_ui():
     with st.expander("إضافة صفقة جديدة", expanded=True):
         c1, c2, c3 = st.columns(3)
         with c1:
-            activity = st.selectbox("النشاط", [
-                "تجاري","صناعي","صحي","تعليمي","رياضي وترفيهي","سياحي","زراعي وحيواني","بيئي",
-                "اجتماعي","نقل","مركبات","صيانة وتعليم وتركيب","تشييد وإدارة عقارات",
-                "خدمات عامة","ملبوسات ومنسوجات","مرافق عامة","مالي"
-            ])
-            city = st.text_input("المدينة", key="deal_city")
-            district = st.text_input("الحي", key="deal_district")
+            activity = st.selectbox(
+                "النشاط",
+                [
+                    "تجاري","صناعي","صحي","تعليمي","رياضي وترفيهي","سياحي","زراعي وحيواني","بيئي",
+                    "اجتماعي","نقل","مركبات","صيانة وتعليم وتركيب","تشييد وإدارة عقارات",
+                    "خدمات عامة","ملبوسات ومنسوجات","مرافق عامة","مالي"
+                ],
+                key="deal_add_activity"
+            )
+            city = st.text_input("المدينة", key="deal_add_city")
+            district = st.text_input("الحي", key="deal_add_district")
         with c2:
-            area_m2 = st.number_input("المساحة (م²)", min_value=0.0, key="deal_area")
-            annual_rent = st.number_input("الإيجار السنوي (ريال)", min_value=0.0, key="deal_rent")
-            year = st.number_input("سنة الصفقة", min_value=2000, max_value=2100, value=2024, key="deal_year")
+            area_m2 = st.number_input("المساحة (م²)", min_value=0.0, key="deal_add_area")
+            annual_rent = st.number_input("الإيجار السنوي (ريال)", min_value=0.0, key="deal_add_rent")
+            year = st.number_input("سنة الصفقة", min_value=2000, max_value=2100, value=2024, key="deal_add_year")
         with c3:
-            lat = st.number_input("خط العرض (اختياري)", value=0.0, format="%.6f", key="deal_lat")
-            lon = st.number_input("خط الطول (اختياري)", value=0.0, format="%.6f", key="deal_lon")
-            notes = st.text_input("ملاحظات", key="deal_notes")
+            lat = st.number_input("خط العرض (اختياري)", value=0.0, format="%.6f", key="deal_add_lat")
+            lon = st.number_input("خط الطول (اختياري)", value=0.0, format="%.6f", key="deal_add_lon")
+            notes = st.text_input("ملاحظات", key="deal_add_notes")
 
-        if st.button("حفظ الصفقة", type="primary"):
+        if st.button("حفظ الصفقة", type="primary", key="deal_add_save"):
             db: Session = SessionLocal()
             try:
                 db.add(Deal(
@@ -74,26 +78,26 @@ def deals_ui():
 
     st.divider()
     st.subheader("تعديل/حذف صفقة")
-    selected_id = st.selectbox("اختر رقم الصفقة", df["id"].tolist())
+    selected_id = st.selectbox("اختر رقم الصفقة", df["id"].tolist(), key="deal_edit_select_id")
     row = df[df["id"] == selected_id].iloc[0].to_dict()
 
     e1, e2, e3 = st.columns(3)
     with e1:
-        e_activity = st.text_input("النشاط", value=row["activity"])
-        e_city = st.text_input("المدينة", value=row["city"] or "")
-        e_district = st.text_input("الحي", value=row["district"] or "")
+        e_activity = st.text_input("النشاط", value=row["activity"], key="deal_edit_activity")
+        e_city = st.text_input("المدينة", value=row["city"] or "", key="deal_edit_city")
+        e_district = st.text_input("الحي", value=row["district"] or "", key="deal_edit_district")
     with e2:
-        e_area = st.number_input("المساحة (م²)", min_value=0.0, value=float(row["area_m2"] or 0.0))
-        e_rent = st.number_input("الإيجار السنوي (ريال)", min_value=0.0, value=float(row["annual_rent"] or 0.0))
-        e_year = st.number_input("سنة الصفقة", min_value=2000, max_value=2100, value=int(row["year"] or 2024))
+        e_area = st.number_input("المساحة (م²)", min_value=0.0, value=float(row["area_m2"] or 0.0), key="deal_edit_area")
+        e_rent = st.number_input("الإيجار السنوي (ريال)", min_value=0.0, value=float(row["annual_rent"] or 0.0), key="deal_edit_rent")
+        e_year = st.number_input("سنة الصفقة", min_value=2000, max_value=2100, value=int(row["year"] or 2024), key="deal_edit_year")
     with e3:
-        e_lat = st.number_input("خط العرض", value=float(row["lat"] or 0.0), format="%.6f")
-        e_lon = st.number_input("خط الطول", value=float(row["lon"] or 0.0), format="%.6f")
-        e_notes = st.text_input("ملاحظات", value=row["notes"] or "")
+        e_lat = st.number_input("خط العرض", value=float(row["lat"] or 0.0), format="%.6f", key="deal_edit_lat")
+        e_lon = st.number_input("خط الطول", value=float(row["lon"] or 0.0), format="%.6f", key="deal_edit_lon")
+        e_notes = st.text_input("ملاحظات", value=row["notes"] or "", key="deal_edit_notes")
 
     c_upd, c_del = st.columns(2)
     with c_upd:
-        if st.button("تحديث الصفقة"):
+        if st.button("تحديث الصفقة", key="deal_edit_update"):
             db: Session = SessionLocal()
             try:
                 d = db.query(Deal).filter(Deal.id == int(selected_id)).first()
@@ -116,7 +120,7 @@ def deals_ui():
 
     with c_del:
         require_role(["admin"])
-        if st.button("حذف الصفقة", type="secondary"):
+        if st.button("حذف الصفقة", type="secondary", key="deal_edit_delete"):
             db: Session = SessionLocal()
             try:
                 d = db.query(Deal).filter(Deal.id == int(selected_id)).first()
