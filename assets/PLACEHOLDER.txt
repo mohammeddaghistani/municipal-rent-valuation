@@ -1,0 +1,1 @@
+ضع logo.png و Tajawal-Regular.ttf داخل هذا المجلد (اختياري لتحسين الهوية).
