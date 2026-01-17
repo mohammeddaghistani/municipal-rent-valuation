@@ -1,9 +1,0 @@
-
-streamlit
-streamlit-folium
-folium
-pandas
-numpy
-sqlalchemy
-pillow
-pypdf
