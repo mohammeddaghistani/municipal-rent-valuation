@@ -1,43 +1,41 @@
 import io
-from reportlab.lib.pagesizes import A4
-from reportlab.pdfgen import canvas
-from reportlab.pdfbase import pdfmetrics
-from reportlab.pdfbase.ttfonts import TTFont
 from pathlib import Path
+from fpdf import FPDF
 import arabic_reshaper
 from bidi.algorithm import get_display
 
 def _ar(text: str) -> str:
-    # تشكيل عربي بسيط
     if not text:
         return ""
-    return get_display(arabic_reshaper.reshape(text))
+    return get_display(arabic_reshaper.reshape(str(text)))
+
+class PDF(FPDF):
+    pass
 
 def generate_pdf(report_data: dict) -> bytes:
-    buf = io.BytesIO()
-    c = canvas.Canvas(buf, pagesize=A4)
-    width, height = A4
+    pdf = PDF(orientation="P", unit="mm", format="A4")
+    pdf.set_auto_page_break(auto=True, margin=12)
+    pdf.add_page()
 
     font_path = Path("assets/Tajawal-Regular.ttf")
     if font_path.exists():
-        pdfmetrics.registerFont(TTFont("Tajawal", str(font_path)))
-        c.setFont("Tajawal", 14)
+        pdf.add_font("Tajawal", "", str(font_path), uni=True)
+        pdf.set_font("Tajawal", size=14)
     else:
-        c.setFont("Helvetica", 12)
+        pdf.set_font("Helvetica", size=12)
 
-    y = height - 60
-    c.drawString(40, y, _ar("تقرير تقييم إيجاري (داخلي)"))
-    y -= 30
+    pdf.cell(0, 10, _ar("تقرير تقييم إيجاري (داخلي)"), ln=True)
+    pdf.ln(2)
+
+    if font_path.exists():
+        pdf.set_font("Tajawal", size=11)
+    else:
+        pdf.set_font("Helvetica", size=10)
 
     for k, v in report_data.items():
         line = f"{k}: {v}"
-        c.drawString(40, y, _ar(line))
-        y -= 22
-        if y < 60:
-            c.showPage()
-            y = height - 60
-            c.setFont(c._fontname, c._fontsize)
+        pdf.multi_cell(0, 7, _ar(line))
 
-    c.showPage()
-    c.save()
-    return buf.getvalue()
+    out = io.BytesIO()
+    pdf.output(out)
+    return out.getvalue()
