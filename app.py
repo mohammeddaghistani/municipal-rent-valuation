@@ -1,3 +1,4 @@
+st.set_page_config(...)
 import streamlit as st
 from modules.db import init_db
 from modules.auth import login_required
