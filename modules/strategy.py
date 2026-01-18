@@ -41,3 +41,13 @@ def strategy_ui():
 
     st.dataframe(summary, use_container_width=True, hide_index=True)
     st.bar_chart(summary.set_index("activity")["مؤشر الاستدامة (0-100)"])
+
+    st.divider()
+    st.markdown("### تحليل استراتيجي ذكي (اختياري)")
+    if st.button("تشغيل التحليل الاستراتيجي الذكي", key="ai_strategy_run"):
+        try:
+            from ai.strategy import strategic_summary
+            st.write(strategic_summary([]))
+        except Exception as e:
+            st.error(f"تعذر تشغيل التحليل الاستراتيجي: {e}")
+

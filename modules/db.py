@@ -1,8 +1,6 @@
-from pathlib import Path
-
-from sqlalchemy import Boolean, Column, Float, Integer, String, Text, create_engine
+from sqlalchemy import create_engine, Column, Integer, Float, String, Boolean, Text
 from sqlalchemy.orm import declarative_base, sessionmaker
-
+from pathlib import Path
 from modules.utils import now_iso
 
 DB_PATH = Path("data/app.db")
@@ -12,7 +10,6 @@ engine = create_engine(f"sqlite:///{DB_PATH}", connect_args={"check_same_thread"
 SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False)
 Base = declarative_base()
 
-
 class User(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True)
@@ -21,7 +18,6 @@ class User(Base):
     role = Column(String, nullable=False, default="valuer")
     is_active = Column(Boolean, default=True)
     created_at = Column(String, default=now_iso)
-
 
 class Deal(Base):
     __tablename__ = "deals"
@@ -37,7 +33,6 @@ class Deal(Base):
     notes = Column(Text, nullable=True)
     created_at = Column(String, default=now_iso)
     updated_at = Column(String, default=now_iso)
-
 
 class Evaluation(Base):
     __tablename__ = "evaluations"
@@ -60,38 +55,12 @@ class Evaluation(Base):
     created_by = Column(String, nullable=True)
     created_at = Column(String, default=now_iso)
 
-
-class AppSettings(Base):
-    __tablename__ = "app_settings"
-    id = Column(Integer, primary_key=True)
-    yield_rate_pct = Column(Float, nullable=False, default=8.0)  # نسبة العائد
-    grace_period_years = Column(Float, nullable=False, default=0.0)  # فترة السماح
-    rent_to_sale_pct = Column(Float, nullable=False, default=5.0)  # نسبة الإيجار من قيمة البيع
-    updated_at = Column(String, default=now_iso)
-
-
 def init_db():
     Base.metadata.create_all(engine)
 
-
-def ensure_settings():
-    """Ensure there is always a singleton settings row."""
-    init_db()
+def get_db():
     db = SessionLocal()
     try:
-        row = db.query(AppSettings).filter(AppSettings.id == 1).first()
-        if not row:
-            db.add(AppSettings(id=1, yield_rate_pct=8.0, grace_period_years=0.0, rent_to_sale_pct=5.0, updated_at=now_iso()))
-            db.commit()
-    finally:
-        db.close()
-
-
-def get_settings() -> AppSettings:
-    ensure_settings()
-    db = SessionLocal()
-    try:
-        row = db.query(AppSettings).filter(AppSettings.id == 1).first()
-        return row
+        yield db
     finally:
         db.close()
