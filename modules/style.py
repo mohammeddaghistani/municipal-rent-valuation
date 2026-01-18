@@ -11,7 +11,7 @@ def _b64(path: Path) -> str:
     return base64.b64encode(path.read_bytes()).decode("utf-8")
 
 
-def apply_branding(page_title: str = "تقدير القيمة الإيجارية للعقارات الاستثمارية") -> Optional[Path]:
+#def apply_branding(page_title: str = "تقدير القيمة الإيجارية للعقارات الاستثمارية") -> Optional[Path]:
     """Apply RTL + modern brand UI and set page config safely."""
 
     # Derived roughly from logo palette (gold + green)
