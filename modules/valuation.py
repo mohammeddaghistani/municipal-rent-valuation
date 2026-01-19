@@ -1,9 +1,4 @@
-
-import streamlit as st
-from streamlit_folium import st_folium
-import folium
-
-def valuation_ui():
+def valuation_ui(user=None):
     st.subheader("التقييم")
     activity = st.selectbox("النشاط", ["تجاري","صناعي","صحي","تعليمي"])
     area = st.number_input("المساحة", min_value=0.0)
