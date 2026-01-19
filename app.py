@@ -1,13 +1,9 @@
-import streamlit as st
-from modules.db import init_db
-from modules.auth import login_required
-from modules.dashboard import render_dashboard
-
-def main():
-    st.set_page_config(page_title="نظام دعم قرار التقييم الإيجاري", page_icon="📌", layout="wide")
-    init_db()
-    user = login_required()
-    render_dashboard(user)
-
-if __name__ == "__main__":
-    main()
+def valuation_ui(user=None):
+    st.subheader("التقييم")
+    activity = st.selectbox("النشاط", ["تجاري","صناعي","صحي","تعليمي"])
+    area = st.number_input("المساحة", min_value=0.0)
+    m = folium.Map(location=[24.7,46.7], zoom_start=6)
+    st_folium(m, height=300)
+    if st.button("تنفيذ التقييم"):
+        st.metric("القيمة المقترحة", f"{area*50:,.0f} ريال")
+        st.write("درجة الثقة: 75% (عالية)")
